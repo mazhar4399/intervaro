@@ -1,36 +1,44 @@
 	.card {
-		max-width: 100% !important;
+	    max-width: 100% !important;
 	}
-	  body { background: #f0f0f1 !important; } /* Adding !important forces the browser to overwrite the default style applied by Bootstrap */
+	
+	body {
+	    background: #f0f0f1 !important;
+	}
+	/* Adding !important forces the browser to overwrite the default style applied by Bootstrap */
 	/*select {
 		width: 100% !important;
 		max-width: 100% !important;
 	}*/
-
+	
 	.card {
-		max-width: 100% !important;
+	    max-width: 100% !important;
 	}
 	
 	body {
-		background: #f0f0f1 !important;
+	    background: #f0f0f1 !important;
 	}
 	/* Adding !important forces the browser to overwrite the default style applied by Bootstrap */
 	
 	.room_select {
-		width: 100% !important;
-		max-width: 100% !important;
-	}
-
-	.rms_msg h5{
-			text-align: center !important;
-		}
-
-	@media only screen and (max-width: 600px) {
-	  .tabs-container ul li {
-		width: 100% !important;
-	}
+	    width: 100% !important;
+	    max-width: 100% !important;
 	}
 	
-	.rms-col-action{
-  width: 77px !important;
-}
+	.rms_msg h5 {
+	    text-align: center !important;
+	}
+	
+	@media only screen and (max-width: 600px) {
+	    .tabs-container ul li {
+	        width: 100% !important;
+	    }
+	}
+	
+	.rms-col-action {
+	    width: 77px !important;
+	}
+	
+	.row {
+	    margin-top: 20px !important;
+	}

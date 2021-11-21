@@ -23,6 +23,108 @@ class WPI_Woo_Product_Import {
         add_action('wp_ajax_update_product_by_id', array($this, 'update_product_by_id')); // This is for authenticated users
 
         add_action('wp_ajax_import_single_product_by_id', array($this, 'import_single_product_by_id')); // This is for authenticated users
+        
+        add_action('wp_ajax_import_woo_products', array($this, 'import_woo_products')); // This is for authenticated users
+
+    }
+
+    function import_woo_products(){
+        
+        $resp = array('status' => '', 'title' => '', 'message' => '', 'import_result' => '');
+        $resp['import_result'] = array('new_added' => 0, 'already_added' => 0, 'import_failed' => 0);
+
+        $response = "";
+
+        $all_post_ids = array();
+
+        $the_query = new WP_Query(array('post_type' => 'product','posts_per_page' => - 1));
+
+        $post_ids = wp_list_pluck( $the_query->posts, 'ID' );
+       
+       foreach ($post_ids as $key => $post_id) {
+
+            $wpi_id = get_post_meta($post_id, '_wpi_id', true);
+            
+            if(!empty($wpi_id)){
+                array_push($all_post_ids, $wpi_id);
+            }
+        
+        }
+        if(isset($_POST['page_no']) && isset($_POST['limit'])){
+            $page_no = isset($_POST['page_no']) && !empty($_POST['page_no']) ? $_POST['page_no'] : 1;
+            $limit = isset($_POST['limit']) && !empty($_POST['limit']) ? $_POST['limit'] : 1;
+            $products = get_products_api($page_no,$limit);
+        }else{
+            $products = get_all_products();
+        }
+        
+    
+
+        
+        $count_imported = 0;
+        $count_already = 0;
+        $count_failed = 0;
+        $count_failed_estatedID = 0;
+        $concld = "";
+        $totla_products = count($products);
+        //$concld .=  "Total Products are $totla_products". ".\n";;
+        
+        if ($products && count($products) >= 1) {
+            foreach ($products as $product) {
+             
+                    $mainProdId = $product['id'];
+                    if (!IN_ARRAY($mainProdId, $all_post_ids)) {
+                        $respp = import_products($product);
+                        if ($respp == 1) {
+                            $count_imported++;
+                            $resp['import_result']['new_added'] = $resp['import_result']['new_added']+1;
+                            $response .=  $mainProdId. __("Product added Successfully.", 'woo-product-api-import');
+                            $response .=  "\n";
+                        } else {
+                            $count_failed++;
+                            $response .=  $respp['message'];
+                            $response .=  "\n";
+                            $resp['import_result']['import_failed'] = $resp['import_result']['import_failed']+1;
+                        }
+                    } else {
+                        $count_already++;
+                        $resp['import_result']['already_added'] = $resp['import_result']['already_added']+1;
+                        $response .=   $mainProdId. "  " .__("Product already exist.", 'woo-product-api-import');
+                        $response .=  "\n";
+                    }
+                
+            }
+        }else{
+            $concld .= "No Product found.";
+        }
+
+        if($count_imported > 0){
+            $concld .= $count_imported." ". __( "New Products imported successfully.", 'woo-product-api-import' ). "\n";
+        }
+        if($count_already > 0){
+            $concld .= $count_already." ". __( "Products already has imported.", 'woo-product-api-import' ). "\n";
+        }
+        
+        if($count_failed > 0){
+            $concld .= $count_failed." ". __( "Products faild to import.", 'woo-product-api-import' ). "\n";
+        }
+
+        $resp['status'] = 'info';
+
+        $resp['title'] = __('', 'woo-product-api-import');
+
+        $total_found = count($products);
+        
+        $resp['total_found'] = $total_found ;
+
+       
+
+        $resp['message'] = $concld;
+
+        echo json_encode($resp);
+
+        wp_die();
+
 
     }
 
@@ -166,105 +268,6 @@ class WPI_Woo_Product_Import {
         }
 
     }
-
-
-
-
-    function import_bulk_products() {
-      
-        error_reporting(E_ALL);
-
-        ini_set('display_errors', 1);
-
-        set_time_limit(0);
-
-        $resp = array('status' => '', 'title' => '', 'message' => '');
-        $response = "";
-
-        $all_post_ids = array();
-
-        $the_query = new WP_Query(array('post_type' => 'product','posts_per_page' => - 1));
-
-        $post_ids = wp_list_pluck( $the_query->posts, 'ID' );
-       
-       foreach ($post_ids as $key => $post_id) {
-
-            $wpi_id = get_post_meta($post_id, '_wpi_id', true);
-            
-            if(!empty($wpi_id)){
-                array_push($all_post_ids, $wpi_id);
-            }
-        
-        }
-        if(isset($_POST['page_no']) && isset($_POST['limit'])){
-            $page_no = isset($_POST['page_no']) && !empty($_POST['page_no']) ? $_POST['page_no'] : 1;
-            $limit = isset($_POST['limit']) && !empty($_POST['limit']) ? $_POST['limit'] : 1;
-            $products = get_products_api($page_no,$limit);
-        }else{
-            $products = get_all_products();
-        }
-        
-    
-
-
-        $count_imported = 0;
-        $count_already = 0;
-        $count_failed = 0;
-        $count_failed_estatedID = 0;
-        $concld = "";
-        $totla_products = count($products);
-        //$concld .=  "Total Products are $totla_products". ".\n";;
-        
-        if ($products && count($products) >= 1) {
-            foreach ($products as $product) {
-             
-                    $mainProdId = $product['id'];
-                    if (!IN_ARRAY($mainProdId, $all_post_ids)) {
-                        $respp = import_products($product);
-                        if ($respp == 1) {
-                            $count_imported++;
-                            $response .=  $mainProdId. __("Product added Successfully.", 'woo-product-api-import');
-                            $response .=  "\n";
-                        } else {
-                            $count_failed++;
-                            $response .=  $respp['message'];
-                            $response .=  "\n";
-                        }
-                    } else {
-                        $count_already++;
-                        $response .=   $mainProdId. "  " .__("Product already exist.", 'woo-product-api-import');
-                        $response .=  "\n";
-                    }
-                
-            }
-        }else{
-            $concld .= "No Product found.";
-        }
-
-        if($count_imported > 0){
-            $concld .= $count_imported." ". __( "New Products imported successfully.", 'woo-product-api-import' ). "\n";
-        }
-        if($count_already > 0){
-            $concld .= $count_already." ". __( "Products already has imported.", 'woo-product-api-import' ). "\n";
-        }
-        
-        if($count_failed > 0){
-            $concld .= $count_failed." ". __( "Products faild to import.", 'woo-product-api-import' ). "\n";
-        }
-
-        $resp['status'] = 'info';
-
-        $resp['title'] = __('', 'woo-product-api-import');
-
-        $resp['message'] = $concld;
-
-        echo json_encode($resp);
-
-        wp_die();
-
-    }
-
-
 
 
     static function wpi_activated(){

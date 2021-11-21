@@ -1,5 +1,7 @@
 <?php
-	$products = get_all_products();
+	$limit = 10;
+	$page_no = isset($_REQUEST['page_no']) && !empty($_REQUEST['page_no']) ? $_REQUEST['page_no'] : 1;
+	$products = get_products_api($page_no,10);
 	$total_pages = count($products);
 	global $wpdb;
 
@@ -25,19 +27,30 @@
 <div class="wrap">
 	<div class="row">
 		<div class="col-md-12">
-		<div class="card">
-			<div class="card-body pr-0 pl-0">
-			<h1> <?php _e('WooCommerece Products Importer', 'room-booking-management') ?> </h1>
+			<div class="card">
+				<div class="card-body pr-0 pl-0">
+				<h1> <?php _e('WooCommerece Products Importer') ?> </h1>
+				</div>
 			</div>
-		</div> <?php if(isset($value_msg) && !empty($value_msg)){ ?> <div class="alert alert-
-					<?php echo $msg_status; ?>" style="margin: 20px 0px 0px 0px;">
-			<p style="margin: 0px;font-size: 18px;"> <?php echo $value_msg; ?> </p>
 		</div>
-		<script type="text/javascript">
-			toastr.options.positionClass = "toast-bottom-right";
-			toastr.success(" < ? php echo $value_msg; ? > ")
-		</script> <?php }?>
-		</div>
+	</div>
+	<div class="row wpi_import_response_pre" style="margin-top:20px; display:none;">
+			<div class="col-md-12" id="wpi_import_response">
+				<div class="alert alert-success" id="wpi_import_response">
+					<div class="new_added">
+						<span class="records"></span>
+						<span class="msg"></span>
+					</div>
+					<div class="already_added">
+						<span class="records"></span>
+						<span class="msg"></span>
+					</div>
+					<div class="import_failed">
+						<span class="records"></span>
+						<span class="msg"></span>
+					</div>
+				</div>
+			</div>
 	</div>
 	<div class="row" style="margin-top:20px;">
 		<div class="col-md-6">
@@ -45,32 +58,18 @@
 				<div class="card-body">
 				<h2 class="card-title text-center"> <?php echo __( 'Import Multiple Products', 'woo-product-api-import' ) ?> </h2>
 				<p class="card-text"> <?php echo __( 'Import Products from API', 'woo-product-api-import' ) ?> </p>
-				<form action="" method="post" name="import_bulk_products">
+				<form action="" method="post" name="import_woo_products">
 					<div class="row">
-						<div class="col-md-6">    
-								<label>Pages No </label>
-								<select id="import_object_type" name="page_no" class="form-control">
-									<?php
-									$page_no =1;
-										for($i=1; $i<= $total_pages; $i+=10){
-											?>
-												<option value="<?php echo $page_no; ?>"><?php echo $page_no; ?></option>
-											<?php
-											$page_no++;
-										}
-									?>
-								</select>
-						</div>
 						<div class="col-md-6">    
 							<label>Limit</label>
 								<select id="limit" name="limit" class="form-control">
 								<option value="10">10</option>
-								<!-- <option value="0">All</option> -->
+								 <!-- <option value="0">1000</option> -->
 						</select>
 					</div>
 					<div class="row">
 					<div class="col-md-12" style="margin-top:20px;">
-						<input type="hidden" name="action" value="import_bulk_products" style="display: none; visibility: hidden; opacity: 0;">
+						<input type="hidden" name="action" value="import_woo_products" style="display: none; visibility: hidden; opacity: 0;">
 					</div>
 					<div class="col-md-12 text-center">
 						<button type="submit" class="btn btn-success">Start to Import!</button>
@@ -81,29 +80,8 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-md-6">
-			<div class="card">
-				<div class="card-body">
-				<h2 class="card-title text-center"> <?php echo __( 'Import Bulk Products', 'woo-product-api-import' ) ?> </h2>
-				<p class="card-text"> <?php echo __( 'Import Products from API', 'woo-product-api-import' ) ?> </p>
-				<form action="" method="post" name="import_bulk_products">
-					
-					<div class="row">
-					<div class="col-md-12">
-						<input type="hidden" name="action" value="import_bulk_products" style="display: none; visibility: hidden; opacity: 0;">
-					</div>
-					<div class="col-md-12 text-center">
-						<button type="submit" class="btn btn-success">Start to Import!</button>
-					</div>
-					</div>
-				</form>
-				</div>
-			</div>
-		</div>
 	</div>
-	<div class="row">
-		
-	</div>
+
 	<div class="row">
 		<div class="col-md-12">
 			<div class="card">
@@ -174,11 +152,92 @@
 			</div>
 		</div>
 	</div>
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="text-right">
+				<?php
+				if(isset($_REQUEST['page_no']) && $_REQUEST['page_no'] > 1){
+					?>
+					<a class="btn btn-success"  href="?page=wpi_settings&page_no=<?php echo $page_no-1; ?>">Previous Page</a>
+					<?php
+				}
+				if(count($products) == $limit){
+					?>
+					<a class="btn btn-primary" href="?page=wpi_settings&page_no=<?php echo $page_no+1; ?>" > Next Page</a>
+					<?php
+				}
+
+				?>
+			</div>
+		</div>
+	</div>
+	
 </div>
+
 		
 
 
 <script type = "text/javascript" > 
+(function($) {
+	function get_products_loop(i){
+		var page_no = i || 1; // uses i if it's set, otherwise uses 0
+		limit = $('form[name="import_woo_products"] #limit').val();
+		setTimeout(
+			function() {
+				$.ajax({
+					url: ajaxurl, 
+					type: 'post',
+					data: {'page_no' : page_no, 'limit' : limit, 'action' : 'import_woo_products'},
+					success: function(response) {
+						$('.wpi_import_response_pre').show();
+						//$.LoadingOverlay("hide");
+						resp = JSON.parse(response);
+						//swal(resp.title, resp.message, resp.status);
+						//location.reload();
+						if(resp.total_found == limit){
+							get_products_loop(page_no + 1);
+						}else{
+							swal('Import Finished.', '', 'success');
+						}
+							if(resp.import_result.new_added >= 1){
+								element = '#wpi_import_response .new_added';
+								records = parseInt($(element + ' .records').text()) || 0;
+								$(element + ' .records').html(parseInt(resp.import_result.new_added)+parseInt(records));
+								$(element + ' .msg').html('Products has imported successfully.');
+							}
+							if(resp.import_result.already_added >= 1){
+								element = '#wpi_import_response .already_added';
+								records = parseInt($(element + ' .records').text()) || 0;
+								$(element+' .records').html(parseInt(resp.import_result.already_added)+parseInt(records));
+								$(element+' .msg').html('Products already imported.');
+							}
+							if(resp.import_result.import_failed >= 1){
+								element = '#wpi_import_response .import_failed';
+								records = parseInt($(element+' .records').text()) || 0;
+								$(element+ ' .records').html(parseInt(resp.import_result.import_failed)+parseInt(records));
+								$(element+ ' .msg').html('Products failed to Import.');
+							}
+					},
+					fail: function(err) {
+						$.LoadingOverlay("hide");
+						alert("There was an error: " + err);
+					},
+					timeout: 7200000 // sets timeout to 3 seconds
+				});
+
+		}, 1000);
+	}
+
+	$('form[name="import_woo_products"]').on('submit', function() {
+		$('#wpi_import_response span').empty();
+		$('.wpi_import_response_pre').hide();
+			get_products_loop(1);
+		return false;
+	}); 
+
+})(jQuery);
+
 
 function update_product_object(id) {
 	jQuery.LoadingOverlay("show");
@@ -225,29 +284,7 @@ function import_single_product(id) {
 		}
 	});
 }
-jQuery('form[name="import_bulk_products"]').on('submit', function() {
-	var form_data = jQuery(this).serializeArray();
-	jQuery.LoadingOverlay("show", {
-		text: "Vänta!"
-	});
-	jQuery.ajax({
-		url: ajaxurl, // Here goes our WordPress AJAX endpoint.
-		type: 'post',
-		data: form_data,
-		success: function(response) {
-			console.log(response);
-			jQuery.LoadingOverlay("hide");
-			resp = JSON.parse(response);
-			swal(resp.title, resp.message, resp.status);
-			//location.reload();
-		},
-		fail: function(err) {
-			jQuery.LoadingOverlay("hide");
-			alert("There was an error: " + err);
-		},
-		timeout: 7200000 // sets timeout to 3 seconds
-	});
-	// This return prevents the submit event to refresh the page.
-	return false;
-}); 
+
 </script>
+
+

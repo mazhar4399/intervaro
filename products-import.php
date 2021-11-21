@@ -60,7 +60,7 @@ function admin_wpi_scripts($check)
         wp_enqueue_style('wpi-bs', WPI_URL . '/admin/assets/css/bootstrap.min.css',array(), '1.0' );
         wp_enqueue_style('wpi-font-awesome', WPI_URL . '/admin/assets/font-awesome/css/font-awesome.min.css',array(), '1.1' );
         wp_enqueue_style('wpi-insp', WPI_URL . '/admin/assets/css/style.css',array(), '1.0' );
-        wp_enqueue_style('wpi-custom', WPI_URL . '/admin/assets/css/custom.css',array(), '1.2');
+        wp_enqueue_style('wpi-custom', WPI_URL . '/admin/assets/css/custom.css',array(), '1.3');
         wp_enqueue_script('sweet-alerts', WPI_URL . '/admin/assets/js/sweetalert.min.js', array('jquery'));
         wp_enqueue_script('wpi-bootstrap', WPI_URL . '/admin/assets/js/bootstrap.min.js');
         wp_enqueue_script('wpi-LoadingOverla', WPI_URL . '/admin/assets/js/loadingoverlay.min.js');

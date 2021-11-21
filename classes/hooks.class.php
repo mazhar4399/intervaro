@@ -71,11 +71,6 @@ Class WPI_Hooks{
                         var form_data = jQuery( id ).serializeArray();
                         var ajax_url = '<?php echo admin_url("admin-ajax.php"); ?>';
                         var ajax_nonce = '<?php echo wp_create_nonce("secure_nonce_name"); ?>';
-                        form_data.push( { "name" : "security", "value" : ajax_nonce } );
-                        form_data.push( { "name" : "action", "value" : "update_property_from_api"  } );
-                        form_data.push( { "name" : "product_id", "value" : id  } );
-                        form_data.push( { "name" : "update_type", "value" : update_type  } );
-                        form_data.push( { "name" : "action_type", "value" : "non_ajax"  } );
                         var data = {
                             action: 'update_product_by_id',
                             product_id: id,
