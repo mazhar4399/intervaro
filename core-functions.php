@@ -2,7 +2,11 @@
 
         function get_products_api($page=1, $limit=10){
 
-            $data = wp_remote_get(WPI_API_BASE_URL."?_page=$page&_limit=$limit");
+            if($limit == 0){
+                $data = wp_remote_get(WPI_API_BASE_URL);
+            }else{
+                $data = wp_remote_get(WPI_API_BASE_URL."?_page=$page&_limit=$limit");
+            }
 
             $data = wp_remote_retrieve_body($data);
 
@@ -25,29 +29,8 @@
         }
 
         function get_all_products(){
-            $all_activities = array();
-            (bool)$getDeliveries = true;
-                (int)$pageId = 1;
-                (int)$size = 10;
-
-                while ($getDeliveries) {
-                    $resp = get_products_api($pageId, $size);
-                
-                    if ($resp == NULL || empty($resp)) {
-                        $getDeliveries = false;
-                    }
-                    if ($resp != NULL || !empty($resp)) {
-                        if (count($resp) < 10) {
-                            $getDeliveries = false;
-                        }
-                        if (count($resp) > 1) {
-                        
-                            $all_activities = array_merge($all_activities,$resp);
-                        }
-                    }
-                    $pageId++;
-                }
-                return $all_activities;
+                $all_products = get_products_api(1, 0);
+             return $all_products;
         }
 
         

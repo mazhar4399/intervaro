@@ -87,7 +87,7 @@
 			<div class="card">
 			<div class="card-body">
 				<h4 class="card-title" style="margin-bottom: 10px;"> <?php echo __( 'List of Products on API', 'woo-product-api-import' ) ?> </h4>
-				<p class="card-title" style="margin-bottom: 40px;"> <?php echo __( 'Total Products are on APIs', 'woo-product-api-import' )." : ". count($products); ?> </p>
+				<p class="card-title" style="margin-bottom: 40px;"> <?php echo __( 'List of Products are ', 'woo-product-api-import' )." : ". count($products); ?> </p>
 				<p class="card-text"></p>
 				<table class="table table-striped table-bordered" id="table_id">
 				<thead>

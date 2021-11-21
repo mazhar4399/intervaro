@@ -18,13 +18,13 @@ class WPI_Woo_Product_Import {
 
         // Actions
 
-        add_action('wp_ajax_import_bulk_products', array($this, 'import_bulk_products')); // This is for authenticated users
+        add_action('wp_ajax_import_bulk_products', array($this, 'import_bulk_products')); 
 
-        add_action('wp_ajax_update_product_by_id', array($this, 'update_product_by_id')); // This is for authenticated users
+        add_action('wp_ajax_update_product_by_id', array($this, 'update_product_by_id')); 
 
-        add_action('wp_ajax_import_single_product_by_id', array($this, 'import_single_product_by_id')); // This is for authenticated users
+        add_action('wp_ajax_import_single_product_by_id', array($this, 'import_single_product_by_id')); 
         
-        add_action('wp_ajax_import_woo_products', array($this, 'import_woo_products')); // This is for authenticated users
+        add_action('wp_ajax_import_woo_products', array($this, 'import_woo_products')); 
 
     }
 
@@ -64,12 +64,11 @@ class WPI_Woo_Product_Import {
         $count_imported = 0;
         $count_already = 0;
         $count_failed = 0;
-        $count_failed_estatedID = 0;
         $concld = "";
         $totla_products = count($products);
-        //$concld .=  "Total Products are $totla_products". ".\n";;
+       
         
-        if ($products && count($products) >= 1) {
+        if ($products && $totla_products >= 1) {
             foreach ($products as $product) {
              
                     $mainProdId = $product['id'];
@@ -113,11 +112,9 @@ class WPI_Woo_Product_Import {
 
         $resp['title'] = __('', 'woo-product-api-import');
 
-        $total_found = count($products);
+        $total_found = $totla_products;
         
         $resp['total_found'] = $total_found ;
-
-       
 
         $resp['message'] = $concld;
 
@@ -128,7 +125,7 @@ class WPI_Woo_Product_Import {
 
     }
 
-    
+    //import single product by id function  -product_id parameter is must
     function import_single_product_by_id(){
         
             $product_id = $_POST['product_id'];
@@ -164,10 +161,6 @@ class WPI_Woo_Product_Import {
             wp_die();
                         
     }   
-
-
-
-    
 
     function update_product_by_id($product_id, $action_type = "")
     {
